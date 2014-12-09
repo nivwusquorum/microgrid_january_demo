@@ -49,5 +49,8 @@ void LCD_print(char letters[], int line);
 // notice that cursor might be behind your current line
 void LCD_cursor(int on);
 
+// Output a number at current cursor position.
+void LCD_int(unsigned int number);
+
 #endif	/* LCD_H */
 

@@ -4,6 +4,7 @@
 
 #include "timer.h"
 #include "lcd.h"
+#include "analog.h"
 
 #define RW PORTBbits.RB8
 #define RS PORTBbits.RB7
@@ -31,6 +32,7 @@
 #define TRIS_D7 TRISBbits.TRISB11
 
 #define LED PORTAbits.RA4
+#define KEYPAD PORTBbits.RB13
 
 // PIC32MX250F128B Configuration Bit Settings
 #pragma config FNOSC = FRCPLL, POSCMOD = OFF
@@ -56,7 +58,14 @@ void pin_init(void) {
     TRISB=0x00;
     PORTA=0x00;
     PORTB=0x00;
+
+    // keypad setup
+    ANSELBbits.ANSB13 = 1;   // set RB3 (AN5) to analog
+    TRISBbits.TRISB13 = 1;   // set RB3 as an input
+    init_analog();
+    AD1CON1SET = 0x8000;    // Enable ADC
 }
+
 
 void init(void) {
     pin_init();
@@ -66,20 +75,17 @@ void init(void) {
 
 void main () {
     init();
-    LCD_print("waddup", 0); // top line
-    LCD_print("counter: 0", 1); // bottom line
-    int ctr = 0;
+    LCD_print("NOT SAMPLED", 0); // top line
 
-    LCD_cursor(1);
     LED = 1;
     while (1) {
         //getNum(15);
         LED = 0;
-        delay_ms(500);
+        delay_ms(300);
         LED = 1;
-        delay_ms(500);
-        LCD_move_cursor(0); //left
-        ctr++;
-        LCD_char('0' + (ctr%10));
+        delay_ms(300);
+
+        LCD_print("READ:", 0);
+        LCD_int(analog_read(11));
     };
 }

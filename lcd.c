@@ -128,3 +128,20 @@ void LCD_print(char letters[], int line) {
     }
 }
 
+void LCD_int(unsigned int number) {
+    char digits[16];
+    int num_digits = 0;
+
+    if (number == 0) {
+        LCD_char('0');
+    } else {
+        while(number) {
+            digits[num_digits++] = '0' + number%10;
+            number /= 10;
+        }
+        while(num_digits--) {
+            LCD_char(digits[num_digits]);
+        }
+    }
+
+}
