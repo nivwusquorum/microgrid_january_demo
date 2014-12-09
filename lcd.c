@@ -1,11 +1,11 @@
 #include "lcd.h"
 
-#include "timer.h"
-
-#define REG volatile unsigned char
 
 
-void LCD_init(){
+void LCD_command(unsigned char command);
+void LCD_write_info(unsigned char info);
+
+void LCD_init(void){
 
     // Set all pins to output and clear them initially
     RW = 0; RS = 0; EN = 0;
@@ -84,8 +84,10 @@ void LCD_write_info(unsigned char info) {
 }
 
 
-void LCD_clear(){	//Clears LCD
+void LCD_reset(void){	//Clears LCD
     LCD_command(1<<0);
+    LCD_home(0);
+    delay_ms(10);
 }
 
 void LCD_move_cursor(int right) {

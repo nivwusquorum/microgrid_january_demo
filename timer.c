@@ -1,6 +1,5 @@
 #include "timer.h"
 
-#include <p32xxxx.h>
 
 void timer_init(void) {
     T1CON = 0x8030;

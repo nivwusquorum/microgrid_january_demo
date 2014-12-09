@@ -28,13 +28,14 @@
 
 // Must be called before everything else
 // Takes a long time! (about 2s).
-void LCD_init();
+void LCD_init(void);
 
 // write a single character to screen
 void LCD_char(unsigned char ch);
 
 // clear display
-void LCD_clear();
+// a bit slow (10ms).
+void LCD_reset(void);
 
 // move cursor to beginning of line.
 void LCD_home(int line);

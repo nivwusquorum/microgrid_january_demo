@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "lcd.h"
 #include "analog.h"
+#include "keypad.h"
 
 #define RW PORTBbits.RB8
 #define RS PORTBbits.RB7
@@ -32,7 +33,6 @@
 #define TRIS_D7 TRISBbits.TRISB11
 
 #define LED PORTAbits.RA4
-#define KEYPAD PORTBbits.RB13
 
 // PIC32MX250F128B Configuration Bit Settings
 #pragma config FNOSC = FRCPLL, POSCMOD = OFF
@@ -71,21 +71,37 @@ void init(void) {
     pin_init();
     timer_init();
     LCD_init();
+    // eventually should read and save to eeprom.
+    Keypad_init_static();
 }
 
 void main () {
     init();
-    LCD_print("NOT SAMPLED", 0); // top line
-
+    LCD_print("Welcome !", 0); // top line
+    delay_ms(1000);
+    LCD_print("BIATCH!!!", 1); // bottom line
     LED = 1;
+    delay_ms(500);
+    int last_key = 0;
+    int key = 0;
+    LCD_reset();
+    LCD_print("NO KEY", 0);
     while (1) {
         //getNum(15);
         LED = 0;
-        delay_ms(300);
+        delay_ms(100);
         LED = 1;
-        delay_ms(300);
+        delay_ms(100);
+        key = Keypad_get_key();
+        if (key != last_key) {
+            if (key == 0) {
+                LCD_print("NO KEY", 0);
+            } else {
+                LCD_print("Pressed ", 0);
+                LCD_char(Keypad_char_for_key(key));
+            }
+            last_key = key;
+        }
 
-        LCD_print("READ:", 0);
-        LCD_int(analog_read(11));
     };
 }

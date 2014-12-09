@@ -8,6 +8,9 @@
 #ifndef TIMER_H
 #define	TIMER_H
 
+#include <p32xxxx.h>
+
+
 // must be called before all the other timer functions.
 void timer_init(void);
 
