@@ -25,7 +25,7 @@ void LCD_init(){
 
     LCD_command(0x38);          // 4-bit 5x7
     LCD_command(0x06);          // Increment cursor position; no display shift
-    LCD_command(0b00001111);    // cursor should be on...
+    LCD_command(0x0C);          // Display on, cursor off
     LCD_command(0x01);          // Clear display
     LCD_command(0x80);          // Set DDRAM address to 0
 
@@ -42,6 +42,14 @@ void LCD_data(unsigned char data){
     delay_us(50);
     // Lower nibble sent
     RS = 0;
+}
+
+void LCD_cursor(int on) {
+    if (on) {
+        LCD_command(0x0F);
+    } else {
+        LCD_command(0x0C);
+    }
 }
 
 void LCD_command(unsigned char command){
@@ -61,6 +69,7 @@ void LCD_command(unsigned char command){
 
 void LCD_char(unsigned char ch){
     LCD_data(ch);
+    LCD_command(0x06);
 }
 
 void LCD_write_info(unsigned char info) {
@@ -79,17 +88,43 @@ void LCD_clear(){	//Clears LCD
     LCD_command(1<<0);
 }
 
-void LCD_home(){                              //LCD cursor home
-    LCD_command(1<<1);
+void LCD_move_cursor(int right) {
+    LCD_command(0x10 | ((0x04)*right));
 }
 
+
+void LCD_home(int line) {
+    LCD_command(1<<1);
+    if (line == 1) {
+        int repeat = 40;
+        // there's got the be a better way!
+        while(repeat--) {
+            LCD_move_cursor(1); // right
+        }
+    }
+}
+
+
 void LCD_print(char letters[], int line) {
+    LCD_home(line);
     // set cursor to appropriate position.
-    int count = 0;
-    while (letters[count] && count < 16){
-        LCD_char(letters[count]);
-        LCD_command(0x06);
-        count++;
+    int lcd_index = 0;
+    int string_index = 0;
+
+    while (lcd_index < 16){
+        if (letters[string_index]) {
+            LCD_char(letters[string_index]);
+            string_index++;
+        } else {
+            LCD_char(' ');
+        }
+        lcd_index++;
     };
+    // string_index is now one char after string
+    lcd_index = 16;
+    while(lcd_index > string_index) {
+        LCD_move_cursor(0); // left
+        --lcd_index;
+    }
 }
 

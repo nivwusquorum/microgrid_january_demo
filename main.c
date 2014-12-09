@@ -66,7 +66,11 @@ void init(void) {
 
 void main () {
     init();
-    LCD_print("waddup motherfuker", 0);
+    LCD_print("waddup", 0); // top line
+    LCD_print("counter: 0", 1); // bottom line
+    int ctr = 0;
+
+    LCD_cursor(1);
     LED = 1;
     while (1) {
         //getNum(15);
@@ -74,5 +78,8 @@ void main () {
         delay_ms(500);
         LED = 1;
         delay_ms(500);
+        LCD_move_cursor(0); //left
+        ctr++;
+        LCD_char('0' + (ctr%10));
     };
 }

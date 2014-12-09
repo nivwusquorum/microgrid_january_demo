@@ -36,11 +36,18 @@ void LCD_char(unsigned char ch);
 // clear display
 void LCD_clear();
 
-// move cursor to beginning of screen (lop-left)
-void LCD_home();
+// move cursor to beginning of line.
+void LCD_home(int line);
+
+// moves cursor to right(1) or left(0).
+void LCD_move_cursor(int right);
 
 // print a string
 void LCD_print(char letters[], int line);
+
+// if depending on "on" value ensures cursor is on or off
+// notice that cursor might be behind your current line
+void LCD_cursor(int on);
 
 #endif	/* LCD_H */
 
