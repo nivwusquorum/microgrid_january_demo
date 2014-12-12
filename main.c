@@ -89,9 +89,9 @@ void main () {
     while (1) {
         //getNum(15);
         LED = 0;
-        delay_ms(100);
-        LED = 1;
-        delay_ms(100);
+        delay_ms(10);
+        //LED = 1;
+        delay_ms(10);
         key = Keypad_get_key();
         if (key != last_key) {
             if (key == 0) {
