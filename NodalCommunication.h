@@ -12,18 +12,19 @@
 
 extern int testGlobal;
 
-void initNetworkCommunication();
+void initNetworkCommunication(int UID);
 void SendNodalString(char * msg);
 void SendNodalFloat(float data);
 
 
 void init485Chip();
-void initUART2();
-void initNodalMessageReceiveInterrupt();
+void initUART2(int UID);
+void initNodalMessageReceiveInterrupt(int UID);
 void putUART2(char data);
 void FIFOputU2(char data);
 void FIFOinitU2();
 void flushFIFOBufferU2();
+void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt( void );
 
 //void initUART2(char sender);
 //void init485();

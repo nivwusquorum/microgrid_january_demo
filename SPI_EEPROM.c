@@ -4,7 +4,9 @@
 #include <spi.h>
 
 //SPI EEPROM DEFINES
-#define SS      LATAbits.LATA12      // slave select pin
+#define SS2      LATCbits.LATC10      // slave select pin
+#define SS2_PPS  LATAbits.LATA12
+
 #define SYSCLK  40000000
 // Macro to get array size in bytes
 // note that array size can't be found after passing pointer to a function
@@ -19,6 +21,7 @@
 
 
 
+
 void initSPI_EEPROM_PPS(){
 
     unsigned int SPICONValue;
@@ -26,10 +29,15 @@ void initSPI_EEPROM_PPS(){
     unsigned int SPIFRAMEValue;
 
     CloseSPI2();
-    
-    TRISGbits.TRISG6 = 0;
-    TRISGbits.TRISG7 = 1;
-    TRISGbits.TRISG8 = 0;
+
+    ANSELGbits.ANSG6 = 0;
+    ANSELGbits.ANSG7 = 0;
+    ANSELGbits.ANSG8 = 0;
+    ANSELAbits.ANSA12 = 0;
+
+    TRISGbits.TRISG6 = 0;   //SDO2
+    TRISGbits.TRISG7 = 1;   //SDI2
+    TRISGbits.TRISG8 = 0;   //SCK2
     TRISAbits.TRISA12 = 0;
 
     PPSInput(IN_FN_PPS_SDI2, IN_PIN_PPS_RPI119);
@@ -57,7 +65,7 @@ void initSPI_EEPROM_PPS(){
 
     OpenSPI2(SPICONValue, SPIFRAMEValue, SPISTATValue );
 
-    SS=1;
+    SS2_PPS=1;
 
 
     //IEC2bits.SPI2IE = 0;
@@ -66,38 +74,40 @@ void initSPI_EEPROM_PPS(){
 
 
 
-
-
-
-
 //Following are written by Dan Strawser
-void initSPI_EEPROM(){
+void initSPI_EEPROM(){    
+ 
+    ANSELCbits.ANSC10=0;        //PIN 71, SS2, set to digital
+    ANSELBbits.ANSB8=0;         //pin 74, SCK2, to digital
+    ANSELBbits.ANSB7=0;         //pin 72, SDO2, to digital
 
-    PPSUnLock;
+    TRISBbits.TRISB8 = 0;       //PIN 74, SCK2, RP40
+    TRISCbits.TRISC13 = 1;       //PIN 73, SDI2, RPI61
+    TRISBbits.TRISB7 = 0;       //PIN 72, SDO2, RP39
+    TRISCbits.TRISC10 = 0;      //PIN 71, SS2, output
 
-    ANSELGbits.ANSG6=0;
-    ANSELGbits.ANSG7=0;
-    ANSELGbits.ANSG8=0;
-    ANSELAbits.ANSA12=0;
+   // TRISGbits.TRISG6 = 0;
+   // TRISGbits.TRISG7 = 1;
+   // TRISGbits.TRISG8 = 0;
 
-    TRISGbits.TRISG6 = 0;
-    TRISGbits.TRISG7 = 1;
-    TRISGbits.TRISG8 = 0;
+   // TRISAbits.TRISA12 = 0;
 
-    TRISAbits.TRISA12 = 0;
+    RPOR3bits.RP40R = 9;        //PIN 74, SCK2, RP40
+    RPINR22bits.SCK2R = 40;     //PIN 74, SCK2, RP40, (as input)
+    RPOR2bits.RP39R = 8;        //PIN 72, SDO2, RP39
+    RPINR22bits.SDI2R = 61;     //PIN 73, SDI2, RPI61
 
-    RPOR11bits.RP120R = 9;  //RP120, PIN 12, as SCK2
-    RPOR10bits.RP118R = 8;  //RP118, PIN 10, as SDO2
-    RPINR22bits.SDI2R = 119;    //RP119, PIN 11, as SDI2
-
-    PPSLock;
+    //RPOR11bits.RP120R = 9;  //RP120, PIN 12, as SCK2
+    //RPOR10bits.RP118R = 8;  //RP118, PIN 10, as SDO2
+    //RPINR22bits.SDI2R = 119;    //RP119, PIN 11, as SDI2
+  
 
     //RPOR3bits.RP40R = 9; //RP40, PIN 74 as SCK2
     //RPOR2bits.RP39R = 8; //RP39, PIN 72, as SDO2
     //RPINR22bits.SDI2R = 61; //RPI61, PIN 73, as SDI2
 
 
-    SS = 1;
+    SS2 = 1;
     // SPI config
     // CKP (clock polarity control) = 0
     // CKE (clock edge control) = 1
@@ -109,17 +119,18 @@ void initSPI_EEPROM(){
 
     SPI2CON1bits.DISSCK=0;
     SPI2CON1bits.DISSDO = 0;
-    SPI2CON1bits.MODE16=0;
-    SPI2CON1bits.SMP=0;
+    SPI2CON1bits.MODE16=0;    
     SPI2CON1bits.CKE=1;
     SPI2CON1bits.CKP=0;   
     SPI2CON1bits.SSEN = 0;
-    SPI2CON1bits.SPRE = 0;
+    SPI2CON1bits.SPRE = 1;
     SPI2CON1bits.PPRE=0;
     SPI2CON1bits.MSTEN=1;
+    SPI2CON1bits.SMP=0;
     
-    SPI2STATbits.SPIEN=1; 
-    
+    SPI2STATbits.SPIEN=1;
+
+   // SPI2BUF = 0;
 
 }
 
@@ -141,10 +152,18 @@ char getUID(){
 
 // Following are mostly from an SPI library
 
+char SPI2_byteToBuffer(char b){
+    SPI2BUF = b;
+
+    return 'a';
+}
+
+
 // SPI2_transfer() - write to and read from SPI2 buffer
 char SPI2_transfer( char b){
    // SPI2BUF = b;                        // write to buffer for TX
     SPI2BUF = b;                        // write to buffer for TX
+    //while(SPI2STATbits.SPITBF);
     while( !SPI2STATbits.SPIRBF);       // wait transfer complete
     return SPI2BUF;                     // read the received value
 } // END SPI2_transfer()
@@ -156,10 +175,10 @@ int waitBusy()
     char status = 0;
 
     do{
-        SS = 0;                         // Select EEPROM
+        SS2 = 0;                         // Select EEPROM
         SPI2_transfer( RDSR);           // Read EEPROM status register       
         status = SPI2_transfer( 0);     // send dummy byte to receive incoming data
-        SS = 1;                         // Release EEPROM
+        SS2 = 1;                         // Release EEPROM
     }while( status & 0x01);             // write-in-progress while status<0> set to '1'
 
     return 0;
@@ -178,7 +197,7 @@ int readEEPROM( unsigned short address, char* loadArray, unsigned short loadArra
     // Wait until EEPROM is not busy
     waitBusy();
 
-    SS = 0;                         // Select EEPROM
+    SS2 = 0;                         // Select EEPROM
     SPI2_transfer( READ);           // initiate read
     SPI2_transfer( address >> 8);   // address must be 16-bits but we're transferring it in two 8-bit sessions
     SPI2_transfer( address);
@@ -187,7 +206,7 @@ int readEEPROM( unsigned short address, char* loadArray, unsigned short loadArra
     for( i=0 ; i<loadArray_size ; i++){
         loadArray[i] = SPI2_transfer( 0x00);    // send dummy byte to read 1 byte
     }
-    SS = 1;                         // Release EEPROM
+    SS2 = 1;                         // Release EEPROM
 
     return 0;
 } // END readEEPROM()
@@ -204,10 +223,10 @@ int writeEEPROM( unsigned short address, char* storeArray, unsigned short storeA
     // Wait until EEPROM is not busy
     waitBusy();
 
-    SS = 0;                 // Select EEPROM
+    SS2 = 0;                 // Select EEPROM
     SPI2_transfer( WREN);   // Send WRITE_ENABLE command
-    SS = 1;                 // Release EEPROM
-    SS = 0;                 // Select EEPROM again after WREN cmd
+    SS2 = 1;                 // Release EEPROM
+    SS2 = 0;                 // Select EEPROM again after WREN cmd
     SPI2_transfer( WRITE);  // initiate write
     SPI2_transfer( address >> 8 );
     SPI2_transfer( address );
@@ -216,19 +235,19 @@ int writeEEPROM( unsigned short address, char* storeArray, unsigned short storeA
     for( i=0 ; i<storeArray_size; i++){
         // New write cycle must be initiated if writing across 128-byte pages
         if( (address+i)%128 == 0 && i!=0 ){
-            SS = 1;                 // Release EEPROM
+            SS2 = 1;                 // Release EEPROM
             waitBusy();
-            SS = 0;                 // Select EEPROM
+            SS2 = 0;                 // Select EEPROM
             SPI2_transfer( WREN);   // Send WRITE_ENABLE command
-            SS = 1;                 // Release EEPROM
-            SS = 0;                 // Select EEPROM again after WREN cmd
+            SS2 = 1;                 // Release EEPROM
+            SS2 = 0;                 // Select EEPROM again after WREN cmd
             SPI2_transfer( WRITE);  // initiate write
             SPI2_transfer( (address+i) >> 8 );
             SPI2_transfer( address+i );
         }
         SPI2_transfer( storeArray[i]);
     }
-    SS = 1;                         // Release EEPROM
+    SS2 = 1;                         // Release EEPROM
 
     return 0;
 } // END writeEEPROM()
@@ -241,12 +260,12 @@ int eraseEEPROM()
     // Wait until EEPROM is not busy
     waitBusy();
 
-    SS = 0;                 // Select EEPROM
+    SS2 = 0;                 // Select EEPROM
     SPI2_transfer( WREN);   // Send WRITE_ENABLE command
-    SS = 1;                 // Release EEPROM
-    SS = 0;                 // Select EEPROM again after WREN cmd
+    SS2 = 1;                 // Release EEPROM
+    SS2 = 0;                 // Select EEPROM again after WREN cmd
     SPI2_transfer( CE);     // send CHIP_ERASE command
-    SS = 1;                 // Release EEPROM
+    SS2 = 1;                 // Release EEPROM
 
     return 0;
 } // END eraseEEPROM()

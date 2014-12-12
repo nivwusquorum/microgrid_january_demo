@@ -16,6 +16,7 @@ void initSPI_EEPROM_PPS();
 void initSPI_EEPROM();
 void initializeDevice();
 char getUID();
+char SPI2_byteToBuffer(char b);
 
 //From library
 char SPI2_transfer( char b);
