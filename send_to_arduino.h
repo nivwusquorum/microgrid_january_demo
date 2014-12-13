@@ -119,9 +119,9 @@ void loop() {
 
 
 // MAKE SURE ALL TREE ARE INITIALIZED AS OUTPUT AND DIGITAL.
-#define RESET LATBbits.LATB13
-#define COMMD LATAbits.LATA7
-#define DATA LATBbits.LATB15
+#define RESET LATAbits.LATA0
+#define COMMD LATAbits.LATA11
+#define DATA LATAbits.LATA12
 
 
 
