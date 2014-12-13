@@ -8,6 +8,7 @@
       <itemPath>SPI_POWER_BOARD.h</itemPath>
       <itemPath>SPI_EEPROM.h</itemPath>
       <itemPath>timer.h</itemPath>
+      <itemPath>lcd.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -21,6 +22,7 @@
       <itemPath>SPI_POWER_BOARD.c</itemPath>
       <itemPath>SPI_EEPROM.c</itemPath>
       <itemPath>timer.c</itemPath>
+      <itemPath>lcd.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
